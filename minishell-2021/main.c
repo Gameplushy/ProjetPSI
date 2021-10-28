@@ -37,6 +37,8 @@ int main(int argc, char* argv[]) {
 	printf("\n|%s|\n",line);
     // Découpage en "tokens"
     tokenize(line,cmdline);
+    for(int i=0;cmdline[i]!=NULL;i++)
+    	printf("%s %d\n",cmdline[i],is_reserved(cmdline[i]));
     // Parsing de la ligne pour remplir les structures
     // de cmds.
     

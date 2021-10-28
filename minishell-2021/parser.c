@@ -90,8 +90,12 @@ int clean(char* str) {
 int tokenize(char* str, char* tokens[]) {
   assert(str!=NULL);
   assert(tokens!=NULL);
-  
-  
+  int i =0;
+  tokens[0] = strtok(str," ");
+  while(tokens[i]!=NULL){
+  	tokens[++i]=strtok(NULL," ");
+  }
+  return 0;
 }
 
 /*
@@ -105,7 +109,10 @@ int tokenize(char* str, char* tokens[]) {
  */
 int is_reserved(const char* tok) {
   assert(tok!=NULL);
-  
+  char* specialKeys[] = {";","&","<",">","||","&&","|","<<","<<<",">&1",">&2",NULL,"2>"};
+  for(int i=0;specialKeys[i]!=NULL;i++)
+  	if(strcmp(tok,specialKeys[i])==0) return 1;
+  return 0;
 }
 
 /*
