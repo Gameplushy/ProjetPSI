@@ -62,20 +62,19 @@ int clean(char* str) {
   assert(str!=NULL);
   char *debut, *fin;
   for(int i=0;i<strlen(str);i++){
-      if(str[i]==' ') {
-				  debut = str+i+1;
-				  for(int j=i+1;j<strlen(str);j++){
-				      if(str[j]!=' '){
-				          fin = str+j;
-				          break;        
-				      }
-				  }      
-				  if (debut<fin)
-				      memmove(debut, fin, strlen(fin)+1);
-			}     
+      	if(str[i]==' ') {
+			  debut = str+i+1;
+			  for(int j=i+1;j<strlen(str);j++){
+				  if(str[j]!=' '){
+				  fin = str+j;
+				  break;        
+				  }
+			  }      
+			  if (debut<fin)
+				  memmove(debut, fin, strlen(fin)+1);
+		}     
   }
 }
-
 
 /*
   Découpage de la chaîne en ses éléments.
@@ -109,7 +108,7 @@ int tokenize(char* str, char* tokens[]) {
  */
 int is_reserved(const char* tok) {
   assert(tok!=NULL);
-  char* specialKeys[] = {";","&","<",">","||","&&","|","<<","<<<",">&1",">&2",NULL,"2>"};
+  char* specialKeys[] = {";","&","<",">","||","&&","|","<<","<<<",">&1",">&2","2>",NULL};
   for(int i=0;specialKeys[i]!=NULL;i++)
   	if(strcmp(tok,specialKeys[i])==0) return 1;
   return 0;
@@ -138,6 +137,61 @@ int is_reserved(const char* tok) {
 int parse_cmd(char* tokens[], process_t* commands) {
   assert(tokens!=NULL);
   assert(commands!=NULL);
-  
-  
+  int i=0;
+  int nbProc = 0;
+  int negator;
+  process_t currentProc;
+  init_process(&currentProc);
+  while(tokens[i]!=NULL){
+  	if(strcmp(tokens[i],"!")==0) negator=1;//NOT
+  	else negator=0;
+  	currentProc.path=tokens[i];
+  	currentProc.argv[0]=tokens[i];
+ 	int argn=1;
+  	while(!is_reserved(tokens[++i])){
+  		currentProc.argv[argn]=tokens[i];
+  	}
+  	//else if(is_reserved(tokens[i])){
+	commands[nbProc]=currentProc;
+	init_process(&currentProc);
+	if(strcmp(tokens[i],"&")==0) commands[nbProc].bg=1;
+	else if((strcmp(tokens[i],"&&")==0 && negator==0) || (strcmp(tokens[i],"||")==0 && negator==1)) commands[nbProc].next_success=&currentProc;
+	else if((strcmp(tokens[i],"||")==0 && negator==0) || (strcmp(tokens[i],"&&")==0 && negator==1)) commands[nbProc].next_failure=&currentProc;
+	else if(strcmp(tokens[i],"|")==0) {
+  		int tube[2];
+  		pipe(tube);
+  		commands[nbProc].stdout=tube[1];
+  		currentProc.stdin=tube[0];
+  		commands[nbProc].next=&currentProc;
+	}
+	else{
+		if(strcmp(tokens[i],">")==0 || strcmp(tokens[i],"2>")==0){
+			if(tokens[i+1]==NULL) return 1;
+			int newFile = open(tokens[i+1],O_WRONLY|O_TRUNC|O_CREAT,0744);
+			if(newFile==-1) return 2;
+			if(strcmp(tokens[i],">")==0) commands[nbProc].stdout=newFile;
+			else if(strcmp(tokens[i],"2>")==0) commands[nbProc].stderr=newFile;
+			++i;
+		}
+		else if (strcmp(tokens[i],">>")==0 || strcmp(tokens[i],"2>>")==0){
+			if(tokens[i+1]==NULL) return 1;
+			int newFile = open(tokens[i+1],O_WRONLY|O_APPEND|O_CREAT,0744);
+			if(newFile==-1) return 2;
+			if(strcmp(tokens[i],">>")==0) commands[nbProc].stdout=newFile;
+			else if(strcmp(tokens[i],"2>>")==0) commands[nbProc].stderr=newFile;
+			++i;
+		}
+		else if(strcmp(tokens[i],"<")==0){
+			if(tokens[i+1]==NULL) return 1;
+			int newFile = open(tokens[i+1],O_RDONLY|O_CREAT,0744);
+			if(newFile==-1) return 2;
+			/*if(strcmp(tokens[i],"<")==0)*/ commands[nbProc].stdin=newFile;
+			++i;
+		}
+		else commands[nbProc].next=&currentProc; //Sinon c'est ; ou rien du tout, donc aucun interférence avec le proc suivant.
+	}
+	nbProc++;	
+  	i++;
+  }
+  return 0;
 }

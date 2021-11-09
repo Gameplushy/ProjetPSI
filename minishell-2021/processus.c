@@ -21,6 +21,8 @@
 #include "processus.h"
 #include "builtin.h"
 
+#include <stdio.h>
+
 #ifndef NDEBUG
 int check_zero(void* ptr, size_t size) {
   int result=0;
@@ -42,7 +44,14 @@ int check_zero(void* ptr, size_t size) {
 int init_process(process_t* proc) {
   assert(proc!=NULL);
   assert(check_zero(proc, sizeof(*proc))==0);
-  
+  process_t newProc;
+  *proc=newProc;
+  proc->path=NULL;
+  proc->argv=NULL;
+  proc->stdin=stdin;
+  proc->stdout=stdout;
+  proc->stderr=stderr;
+  proc->bg=0;
 }
 
 /*
@@ -78,6 +87,25 @@ int set_env(process_t* proc) {
  */
 int launch_cmd(process_t* proc) {
   assert(proc!=NULL);
-  
+  if((proc->pid=fork())!=0){ //Proc minishell
+  	if(proc->bg) waitpid(proc->pid,NULL,0);
+  	return 0;
+  }
+  else{ //Proc commande
+  	if(proc->stdin!=stdin){
+  		dup2(proc->stdin,0);
+  		close(proc->stdin);
+  	}
+  	if(proc->stdout!=stdout){
+  		dup2(proc->stdout,1);
+  		close(proc->stdout);
+  	}
+  	if(proc->stdout!=stderr){
+  		dup2(proc->stderr,2);
+  		close(proc->stderr);
+  	}
+  	execvp(proc->path,proc->argv);
+  	return -1;
+  }
   
 }

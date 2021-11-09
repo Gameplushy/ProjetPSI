@@ -25,23 +25,30 @@ int main(int argc, char* argv[]) {
   
   while (1) {
     // (ré-)Initialiser les variables/structures
-    
+    /*int i=0;
+    while(&cmds[i]!=NULL) &cmds[i++]=NULL;
+    i=0;
+    while(&cmdline[i]!=NULL) &cmdline[i++]=NULL;*/
     // Affichage d'une invite de commande
-
+	//printf("%s>",getcwd());
     // Lecture d'une ligne de commandes
-    fgets(line,MAX_LINE_SIZE,stdin);
+    	fgets(line,MAX_LINE_SIZE,stdin);
 	*(strchr(line,'\n'))='\0';
     // "Nettoyage" de la ligne de commandes
-    trim(line);
+    	trim(line);
 	clean(line);
 	printf("\n|%s|\n",line);
     // Découpage en "tokens"
-    tokenize(line,cmdline);
-    for(int i=0;cmdline[i]!=NULL;i++)
-    	printf("%s %d\n",cmdline[i],is_reserved(cmdline[i]));
+    	tokenize(line,cmdline);
+    	for(int i=0;cmdline[i]!=NULL;i++)
+    		printf("%s %d\n",cmdline[i],is_reserved(cmdline[i]));
     // Parsing de la ligne pour remplir les structures
     // de cmds.
-    
+    	int checkerr = parse_cmd(cmdline,cmds);
+    	switch(checkerr){
+    	 case 1: fprintf(stderr,"No file redirected!\n"); break;
+    	 case 2: fprintf(stderr,"Bad file\n"); break;
+    	}
     // Lancement des commandes dans l'ordre attendu,
     // avec les éventuelles redirections et conditionnements
     // d'exécution.

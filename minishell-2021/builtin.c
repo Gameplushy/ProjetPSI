@@ -33,8 +33,9 @@
  */
 int is_builtin(const char* cmd) {
   assert(cmd!=NULL);
-  
-  
+    char* specialCmds[] = {"exit","cd","pwd","exit","export","unset",NULL};
+  for(int i=0;specialCmds[i]!=NULL;i++)
+  	if(strcmp(cmd,specialCmds[i])==0) return 1;
   return 0;
 }
 
@@ -51,7 +52,10 @@ int is_builtin(const char* cmd) {
 
 int builtin(process_t* proc) {
   assert(proc!=NULL);
-  
+  /*switch(proc->path){
+  	default:
+   		return -1;
+  }*/
   return -1;
 }
 
@@ -68,7 +72,7 @@ int builtin(process_t* proc) {
 
 int cd(const char* path, int fderr) {
   assert(path!=NULL);
-  
+  //return chdir(path);
 }
 
 /*
@@ -85,8 +89,7 @@ int cd(const char* path, int fderr) {
 int export(const char* var, const char* value, int fderr) {
   assert(var!=NULL);
   assert(value!=NULL);
-  
-  
+  setenv(var,value,1);  
 }
 
 /*
