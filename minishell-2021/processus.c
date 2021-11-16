@@ -47,7 +47,7 @@ int init_process(process_t* proc) {
   process_t newProc;
   *proc=newProc;
   proc->path=NULL;
-  proc->argv=NULL;
+  proc->argv=(char**)malloc(sizeof(char*)*20);
   proc->stdin=stdin;
   proc->stdout=stdout;
   proc->stderr=stderr;
