@@ -46,6 +46,7 @@ int init_process(process_t* proc) {
   assert(check_zero(proc, sizeof(*proc))==0);
   process_t newProc;
   *proc=newProc;
+  proc->pid=0;
   proc->path=NULL;
   proc->argv=(char**)malloc(sizeof(char*)*20);
   proc->stdin=stdin;
@@ -87,7 +88,8 @@ int set_env(process_t* proc) {
  */
 int launch_cmd(process_t* proc) {
   assert(proc!=NULL);
-  if((proc->pid=fork())!=0){ //Proc minishell
+  proc->pid=fork();
+  if((proc->pid)!=0){ //Proc minishell
   	if(proc->bg) waitpid(proc->pid,NULL,0);
   	return 0;
   }

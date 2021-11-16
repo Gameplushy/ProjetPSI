@@ -48,6 +48,18 @@ int main(int argc, char* argv[]) {
     	switch(checkerr){
     	 case 1: fprintf(stderr,"No file redirected!\n"); break;
     	 case 2: fprintf(stderr,"Bad file\n"); break;
+    	 case 0:{
+    	 	process_t* currentProc=&cmds[0];
+    	 	while(currentProc!=NULL){
+    	 		int returned = launch_cmd(currentProc);
+    	 		if(currentProc->next!=NULL) currentProc=currentProc->next;
+    	 		else{
+    	 			if(returned==0) currentProc=currentProc->next_success;
+    	 			else currentProc=currentProc->next_failure;
+    	 		}
+    	 	}
+    	 }
+    	 	
     	}
     // Lancement des commandes dans l'ordre attendu,
     // avec les éventuelles redirections et conditionnements
