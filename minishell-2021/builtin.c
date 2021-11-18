@@ -52,6 +52,22 @@ int is_builtin(const char* cmd) {
 
 int builtin(process_t* proc) {
   assert(proc!=NULL);
+	if(strcmp(proc->path,"cd")==0) {
+		if(proc->argv[1]==NULL||proc->argv[2]!=NULL) return -1;
+		return cd(proc->argv[1],proc->stderr);
+	}
+	//if(strcmp(proc->path,"exit")==0) return exit_shell(
+	if(strcmp(proc->path,"export")==0){
+		if(proc->argv[1]==NULL||proc->argv[2]!=NULL) return -1;
+		int c = 0;
+		while(proc->argv[1][c]!='\0' && proc->argv[1][c++]!='=');
+		if(proc->argv[1][--c]=='='){
+			proc->argv[1][c]='\0';
+			return export(proc->argv[1],proc->argv[1]+c+1,proc->stderr);
+		}
+		else return -1;
+	}
+	if(strcmp(proc->path,"unset")==0) return unsetVar(proc->argv[1],proc->stderr);
   /*switch(proc->path){
   	default:
    		return -1;
@@ -71,8 +87,12 @@ int builtin(process_t* proc) {
  */
 
 int cd(const char* path, int fderr) {
-  assert(path!=NULL);
-  //return chdir(path);
+  //assert(path!=NULL);
+  if(path==NULL){
+  	fprintf(fderr,"Vous n'avez pas donné de répertoire!");
+  	return 1;
+  } 
+  return chdir(path);
 }
 
 /*
@@ -89,8 +109,18 @@ int cd(const char* path, int fderr) {
 int export(const char* var, const char* value, int fderr) {
   assert(var!=NULL);
   assert(value!=NULL);
-  setenv(var,value,1);  
+  int retvalue = setenv(var,value,1);  
+  if(retvalue) fprintf(fderr,"Export de la variable %s a retourné la valeur %d\n",var,retvalue);
+  return retvalue;
 }
+
+int unsetVar(const char* var, int fderr) {
+	assert(var!=NULL);
+	int retvalue = unsetenv(var);
+	if(retvalue) fprintf(fderr,"Destruction de la variable %s a retourné la valeur %d\n",var,retvalue);
+	return retvalue;
+}
+
 
 /*
   Quitter le minishell

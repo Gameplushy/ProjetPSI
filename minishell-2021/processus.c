@@ -65,7 +65,15 @@ int init_process(process_t* proc) {
  */
 int set_env(process_t* proc) {
   assert(proc!=NULL);
-  
+  int i=1;
+  while(proc->argv[i]!=NULL){
+  	if(proc->argv[i][0]='$'){
+  		char* res = getenv(proc->argv[i]+1);
+  		if(res==NULL) proc->argv[i]="";
+  		else proc->argv[i]=res;
+  	}
+  	i++;
+  }
 }
 
 /*
@@ -90,8 +98,8 @@ int launch_cmd(process_t* proc) {
   assert(proc!=NULL);
   proc->pid=fork();
   if((proc->pid)!=0){ //Proc minishell
-  	if(proc->bg) waitpid(proc->pid,NULL,0);
-  	return 0;
+  	if(proc->bg) waitpid(proc->pid,&(proc->status),0);
+  	return WEXITSTATUS(proc->status);
   }
   else{ //Proc commande
   	if(proc->stdin!=stdin){
@@ -106,7 +114,8 @@ int launch_cmd(process_t* proc) {
   		dup2(proc->stderr,2);
   		close(proc->stderr);
   	}
-  	execvp(proc->path,proc->argv);
+  	if(is_builtin(proc->path)) return builtin(proc);
+  	else return execvp(proc->path,proc->argv);
   	return -1;
   }
   
