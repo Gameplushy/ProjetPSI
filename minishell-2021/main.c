@@ -1,11 +1,11 @@
 /*
   Projet minishell - Licence 3 Info - PSI 2021
  
-  Nom :
-  Prénom :
-  Num. étudiant :
-  Groupe de projet :
-  Date :
+  Nom : FLORENT HERMAN
+  Prénom : Victor Loïck
+  Num. étudiant : 21900240 22112293
+  Groupe de projet : 15
+  Date : 2021-11-19
  
   Interface du minishell.
  
@@ -14,6 +14,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "parser.h"
 #include "processus.h"
@@ -25,12 +26,12 @@ int main(int argc, char* argv[]) {
   
   while (1) {
     // (ré-)Initialiser les variables/structures
-    /*int i=0;
-    while(&cmds[i]!=NULL) &cmds[i++]=NULL;
+    int i=0;
+    while(strcmp(cmds[i].path,"")==0) memset(&cmds[i],0,sizeof(cmds[i++]));
     i=0;
-    while(&cmdline[i]!=NULL) &cmdline[i++]=NULL;*/
+    while(strcmp(cmdline[i],"")==0) cmdline[i++]="";
     // Affichage d'une invite de commande
-	//printf("%s>",getcwd());
+	printf("%s>",get_current_dir_name());
     // Lecture d'une ligne de commandes
     	fgets(line,MAX_LINE_SIZE,stdin);
 	*(strchr(line,'\n'))='\0';
@@ -60,7 +61,7 @@ int main(int argc, char* argv[]) {
     	 	}
     	 }
     	 	
-    	}
+    	};
     // Lancement des commandes dans l'ordre attendu,
     // avec les éventuelles redirections et conditionnements
     // d'exécution.

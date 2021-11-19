@@ -1,11 +1,11 @@
 /*
   Projet minishell - Licence 3 Info - PSI 2021
  
-  Nom :
-  Prénom :
-  Num. étudiant :
-  Groupe de projet :
-  Date :
+  Nom : FLORENT HERMAN
+  Prénom : Victor Loïck
+  Num. étudiant : 21900240 22112293
+  Groupe de projet : 15
+  Date : 2021-11-19
  
   Gestion des commandes internes du minishell (implémentation).
  
@@ -33,7 +33,7 @@
  */
 int is_builtin(const char* cmd) {
   assert(cmd!=NULL);
-    char* specialCmds[] = {"exit","cd","pwd","exit","export","unset",NULL};
+    char* specialCmds[] = {"exit","cd","pwd","exit","export","unset","echo",NULL};
   for(int i=0;specialCmds[i]!=NULL;i++)
   	if(strcmp(cmd,specialCmds[i])==0) return 1;
   return 0;
@@ -68,6 +68,7 @@ int builtin(process_t* proc) {
 		else return -1;
 	}
 	if(strcmp(proc->path,"unset")==0) return unsetVar(proc->argv[1],proc->stderr);
+	if(strcmp(proc->path,"echo")==0) return echoStuff(proc->argv);
   /*switch(proc->path){
   	default:
    		return -1;
@@ -121,7 +122,15 @@ int unsetVar(const char* var, int fderr) {
 	return retvalue;
 }
 
-
+int echoStuff(char* argv[]){
+	int i=1;
+	while(argv[i]!=NULL){
+		printf("%s ",argv[i]);
+		i++;
+	}
+	printf("\n");
+	return 0;
+}
 /*
   Quitter le minishell
  
