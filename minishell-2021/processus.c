@@ -49,9 +49,9 @@ int init_process(process_t* proc) {
   proc->pid=0;
   proc->path=NULL;
   proc->argv=(char**)malloc(sizeof(char*)*20);
-  proc->stdin=stdin;
-  proc->stdout=stdout;
-  proc->stderr=stderr;
+  proc->stdin=0;
+  proc->stdout=1;
+  proc->stderr=2;
   proc->bg=0;
 }
 
@@ -102,15 +102,15 @@ int launch_cmd(process_t* proc) {
   	return WEXITSTATUS(proc->status);
   }
   else{ //Proc commande
-  	if(proc->stdin!=stdin){
+  	if(proc->stdin!=0){
   		dup2(proc->stdin,0);
   		close(proc->stdin);
   	}
-  	if(proc->stdout!=stdout){
+  	if(proc->stdout!=1){
   		dup2(proc->stdout,1);
   		close(proc->stdout);
   	}
-  	if(proc->stdout!=stderr){
+  	if(proc->stdout!=2){
   		dup2(proc->stderr,2);
   		close(proc->stderr);
   	}

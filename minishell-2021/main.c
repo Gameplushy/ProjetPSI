@@ -25,13 +25,14 @@ int main(int argc, char* argv[]) {
   process_t cmds[MAX_CMD_SIZE];
   
   while (1) {
+  	check_zero(cmds,sizeof(cmds));
     // (ré-)Initialiser les variables/structures
     int i=0;
-    while(strcmp(cmds[i].path,"")==0) memset(&cmds[i],0,sizeof(cmds[i++]));
+    while(check_zero(cmds+i,sizeof(cmds[i]))) memset(&cmds[i],0,sizeof(cmds[i++])); //Réinitialiser toute trace de processus
     i=0;
-    while(strcmp(cmdline[i],"")==0) cmdline[i++]="";
+    while(cmdline+i!=NULL && strlen(cmdline[i])!=0) cmdline[i++]="";
     // Affichage d'une invite de commande
-	printf("%s>",get_current_dir_name());
+	printf("%s>",getcwd(NULL,0));
     // Lecture d'une ligne de commandes
     	fgets(line,MAX_LINE_SIZE,stdin);
 	*(strchr(line,'\n'))='\0';
