@@ -48,6 +48,7 @@ int init_process(process_t* proc) {
   *proc=newProc;
   proc->pid=0;
   proc->path=NULL;
+  proc->next=NULL;
   proc->argv=(char**)malloc(sizeof(char*)*20);
   proc->stdin=0;
   proc->stdout=1;
@@ -98,7 +99,7 @@ int launch_cmd(process_t* proc) {
   assert(proc!=NULL);
   proc->pid=fork();
   if((proc->pid)!=0){ //Proc minishell
-  	if(proc->bg) waitpid(proc->pid,&(proc->status),0);
+  	if(!proc->bg) waitpid(proc->pid,&(proc->status),0);
   	return WEXITSTATUS(proc->status);
   }
   else{ //Proc commande

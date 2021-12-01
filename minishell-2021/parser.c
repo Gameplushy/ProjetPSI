@@ -137,38 +137,50 @@ int is_reserved(const char* tok) {
 int parse_cmd(char* tokens[], process_t* commands) {
   assert(tokens!=NULL);
   assert(commands!=NULL);
+  
+  /*int nbProc = 0;
+  int negator;
+  while(tokens[i]!=NULL){
+	if(strcmp(tokens[i],"!")==0){
+		 negator=1;//NOT
+		 i++;
+	}
+	else negator=0;   
+  	commands[nbProc].path*/
   int i=0;
   int nbProc = 0;
   int negator;
-  process_t currentProc;
+  /*process_t currentProc;
   memset(&currentProc,0,sizeof(currentProc));
-  init_process(&currentProc);
+  init_process(&currentProc);*/
   while(tokens[i]!=NULL){
   	if(strcmp(tokens[i],"!")==0){
   	 negator=1;//NOT
   	 i++;
   	}
   	else negator=0;
-  	currentProc.path=tokens[i];
-  	currentProc.argv[0]=tokens[i];
+  	commands[nbProc].path=tokens[i];
+  	commands[nbProc].argv[0]=tokens[i];
+  	commands[nbProc].argv[1]=NULL;
  	int argn=1;
   	while(tokens[++i]!=NULL && !is_reserved(tokens[i])){
-  		currentProc.argv[argn]=tokens[i];
+  		commands[nbProc].argv[argn++]=tokens[i];
+  		commands[nbProc].argv[argn]=NULL;
   	}
 
-	commands[nbProc]=currentProc;
+	/*commands[nbProc]=currentProc;
 	memset(&currentProc,0,sizeof(currentProc));
-	init_process(&currentProc);
+	init_process(&currentProc);*/
 	if(tokens[i]!=NULL){
 		if(strcmp(tokens[i],"&")==0) commands[nbProc].bg=1;
-		else if((strcmp(tokens[i],"&&")==0 && negator==0) || (strcmp(tokens[i],"||")==0 && negator==1)) commands[nbProc].next_success=&currentProc;
-		else if((strcmp(tokens[i],"||")==0 && negator==0) || (strcmp(tokens[i],"&&")==0 && negator==1)) commands[nbProc].next_failure=&currentProc;
+		else if((strcmp(tokens[i],"&&")==0 && negator==0) || (strcmp(tokens[i],"||")==0 && negator==1)) commands[nbProc].next_success=&commands[nbProc+1];
+		else if((strcmp(tokens[i],"||")==0 && negator==0) || (strcmp(tokens[i],"&&")==0 && negator==1)) commands[nbProc].next_failure=&commands[nbProc+1];
 		else if(strcmp(tokens[i],"|")==0) {
 	  		int tube[2];
 	  		pipe(tube);
 	  		commands[nbProc].stdout=tube[1];
-	  		currentProc.stdin=tube[0];
-	  		commands[nbProc].next=&currentProc;
+	  		commands[nbProc+1].stdin=tube[0];
+	  		commands[nbProc].next=&commands[nbProc+1];
 		}
 		else{
 			if(strcmp(tokens[i],">")==0 || strcmp(tokens[i],"2>")==0){
@@ -194,7 +206,7 @@ int parse_cmd(char* tokens[], process_t* commands) {
 				/*if(strcmp(tokens[i],"<")==0)*/ commands[nbProc].stdin=newFile;
 				++i;
 			}
-			else commands[nbProc].next=&currentProc; //Sinon c'est ; ou rien du tout, donc aucun interférence avec le proc suivant.
+			else commands[nbProc].next=&commands[nbProc+1]; //Sinon c'est ; ou rien du tout, donc aucun interférence avec le proc suivant.
 		}
 		nbProc++;	
   		i++;	

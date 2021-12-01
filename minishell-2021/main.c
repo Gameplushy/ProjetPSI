@@ -25,12 +25,11 @@ int main(int argc, char* argv[]) {
   process_t cmds[MAX_CMD_SIZE];
   
   while (1) {
-  	check_zero(cmds,sizeof(cmds));
     // (ré-)Initialiser les variables/structures
     int i=0;
-    while(check_zero(cmds+i,sizeof(cmds[i]))) memset(&cmds[i],0,sizeof(cmds[i++])); //Réinitialiser toute trace de processus
-    i=0;
-    while(cmdline+i!=NULL && strlen(cmdline[i])!=0) cmdline[i++]="";
+    CLEAR(cmdline,MAX_CMD_SIZE);
+    CLEAR(cmds,MAX_CMD_SIZE);
+    for(int i=0;i<MAX_CMD_SIZE;i++) init_process(&cmds[i]);
     // Affichage d'une invite de commande
 	printf("%s>",getcwd(NULL,0));
     // Lecture d'une ligne de commandes
@@ -39,11 +38,11 @@ int main(int argc, char* argv[]) {
     // "Nettoyage" de la ligne de commandes
     	trim(line);
 	clean(line);
-	printf("\n|%s|\n",line);
+	//printf("\n|%s|\n",line);
     // Découpage en "tokens"
     	tokenize(line,cmdline);
-    	for(int i=0;cmdline[i]!=NULL;i++)
-    		printf("%s %d\n",cmdline[i],is_reserved(cmdline[i]));
+    	/*for(int i=0;cmdline[i]!=NULL;i++)
+    		printf("%s %d\n",cmdline[i],is_reserved(cmdline[i]));*/
     // Parsing de la ligne pour remplir les structures
     // de cmds.
     	int checkerr = parse_cmd(cmdline,cmds);
@@ -53,6 +52,7 @@ int main(int argc, char* argv[]) {
     	 case 0:{
     	 	process_t* currentProc=&cmds[0];
     	 	while(currentProc!=NULL){
+    	 		//set_env(currentProc);
     	 		int returned = launch_cmd(currentProc);
     	 		if(currentProc->next!=NULL) currentProc=currentProc->next;
     	 		else{
