@@ -30,14 +30,16 @@ int main(int argc, char* argv[]) {
     CLEAR(cmdline,MAX_CMD_SIZE);
     CLEAR(cmds,MAX_CMD_SIZE);
     for(int i=0;i<MAX_CMD_SIZE;i++) init_process(&cmds[i]);
+    do{
     // Affichage d'une invite de commande
-	printf("%s>",getcwd(NULL,0));
+		printf("%s>",getcwd(NULL,0));
     // Lecture d'une ligne de commandes
-    	fgets(line,MAX_LINE_SIZE,stdin);
-	*(strchr(line,'\n'))='\0';
+		fgets(line,MAX_LINE_SIZE,stdin);
+		*(strchr(line,'\n'))='\0';
+	} while(strcmp(line,"")==0);
     // "Nettoyage" de la ligne de commandes
     	trim(line);
-	clean(line);
+		clean(line);
 	//printf("\n|%s|\n",line);
     // Découpage en "tokens"
     	tokenize(line,cmdline);
@@ -49,15 +51,18 @@ int main(int argc, char* argv[]) {
     	switch(checkerr){
     	 case 1: fprintf(stderr,"No file redirected!\n"); break;
     	 case 2: fprintf(stderr,"Bad file\n"); break;
+    	 case 3: fprintf(stderr,"Not enough stuff!\n"); break;
     	 case 0:{
     	 	process_t* currentProc=&cmds[0];
     	 	while(currentProc!=NULL){
-    	 		//set_env(currentProc);
+    	 		printf("%d\n",currentProc==NULL);
+    	 		set_env(currentProc);
     	 		int returned = launch_cmd(currentProc);
-    	 		if(currentProc->next!=NULL) currentProc=currentProc->next;
+    	 		if(currentProc->next!=NULL){ currentProc=currentProc->next;}
     	 		else{
-    	 			if(returned==0) currentProc=currentProc->next_success;
-    	 			else currentProc=currentProc->next_failure;
+    	 			if(returned==0 && currentProc->next_success!=NULL){ currentProc=currentProc->next_success;}
+    	 			else if(returned!=0 && currentProc->next_failure!=NULL) { currentProc=currentProc->next_failure;}
+    	 			else{ currentProc=NULL;}
     	 		}
     	 	}
     	 }

@@ -134,4 +134,5 @@ int unsetVar(const char* var, int fderr) {
 
 int exit_shell(int ret, int fdout) {
 	fprintf(fdout,"Fermeture avec code de retour %d\n",ret);  
+	return ret;
 }

@@ -32,7 +32,7 @@
 int trim(char* str) {
   assert(str!=NULL);
 	char *debut;
-	for(int i=0;i<strlen(str);i++){
+	for(size_t i=0;i<strlen(str);i++){
 		if(str[i]!=' '){
 			debut = str+i;
 			break;
@@ -61,10 +61,10 @@ int trim(char* str) {
 int clean(char* str) {
   assert(str!=NULL);
   char *debut, *fin;
-  for(int i=0;i<strlen(str);i++){
+  for(size_t i=0;i<strlen(str);i++){
       	if(str[i]==' ') {
 			  debut = str+i+1;
-			  for(int j=i+1;j<strlen(str);j++){
+			  for(size_t j=i+1;j<strlen(str);j++){
 				  if(str[j]!=' '){
 				  fin = str+j;
 				  break;        
@@ -74,6 +74,7 @@ int clean(char* str) {
 				  memmove(debut, fin, strlen(fin)+1);
 		}     
   }
+  return 0;
 }
 
 /*
@@ -150,40 +151,44 @@ int parse_cmd(char* tokens[], process_t* commands) {
   int i=0;
   int nbProc = 0;
   int negator;
-  /*process_t currentProc;
-  memset(&currentProc,0,sizeof(currentProc));
-  init_process(&currentProc);*/
   while(tokens[i]!=NULL){
   	if(strcmp(tokens[i],"!")==0){
   	 negator=1;//NOT
   	 i++;
+  	 if(tokens[i]==NULL) return 3;
   	}
   	else negator=0;
   	commands[nbProc].path=tokens[i];
   	commands[nbProc].argv[0]=tokens[i];
-  	commands[nbProc].argv[1]=NULL;
  	int argn=1;
   	while(tokens[++i]!=NULL && !is_reserved(tokens[i])){
   		commands[nbProc].argv[argn++]=tokens[i];
-  		commands[nbProc].argv[argn]=NULL;
   	}
-
-	/*commands[nbProc]=currentProc;
-	memset(&currentProc,0,sizeof(currentProc));
-	init_process(&currentProc);*/
+  	commands[nbProc].argv[argn]=NULL;
 	if(tokens[i]!=NULL){
-		if(strcmp(tokens[i],"&")==0) commands[nbProc].bg=1;
-		else if((strcmp(tokens[i],"&&")==0 && negator==0) || (strcmp(tokens[i],"||")==0 && negator==1)) commands[nbProc].next_success=&commands[nbProc+1];
-		else if((strcmp(tokens[i],"||")==0 && negator==0) || (strcmp(tokens[i],"&&")==0 && negator==1)) commands[nbProc].next_failure=&commands[nbProc+1];
+		if(strcmp(tokens[i],"&")==0) {
+			commands[nbProc].bg=1;
+			if(tokens[i+1]!=NULL) commands[nbProc].next=&commands[nbProc+1];
+		}
+		else if((strcmp(tokens[i],"&&")==0 && negator==0) || (strcmp(tokens[i],"||")==0 && negator==1)){
+			printf("hey");
+		 	commands[nbProc].next_success=&commands[nbProc+1];
+		 	if(tokens[i+1]==NULL) return 3;
+		 }
+		else if((strcmp(tokens[i],"||")==0 && negator==0) || (strcmp(tokens[i],"&&")==0 && negator==1)) {
+			commands[nbProc].next_failure=&commands[nbProc+1];
+			if(tokens[i+1]==NULL) return 3;
+		}
 		else if(strcmp(tokens[i],"|")==0) {
+			if(tokens[i+1]==NULL) return 3;
 	  		int tube[2];
 	  		pipe(tube);
 	  		commands[nbProc].stdout=tube[1];
 	  		commands[nbProc+1].stdin=tube[0];
 	  		commands[nbProc].next=&commands[nbProc+1];
 		}
-		else{
-			if(strcmp(tokens[i],">")==0 || strcmp(tokens[i],"2>")==0){
+		else{ //redirecttions
+			if(strcmp(tokens[i],">")==0 || strcmp(tokens[i],"2>")==0){ //Sorties avec écrasement
 				if(tokens[i+1]==NULL) return 1;
 				int newFile = open(tokens[i+1],O_WRONLY|O_TRUNC|O_CREAT,0744);
 				if(newFile==-1) return 2;
@@ -191,7 +196,7 @@ int parse_cmd(char* tokens[], process_t* commands) {
 				else if(strcmp(tokens[i],"2>")==0) commands[nbProc].stderr=newFile;
 				++i;
 			}
-			else if (strcmp(tokens[i],">>")==0 || strcmp(tokens[i],"2>>")==0){
+			else if (strcmp(tokens[i],">>")==0 || strcmp(tokens[i],"2>>")==0){ //Sorties sans écrasement
 				if(tokens[i+1]==NULL) return 1;
 				int newFile = open(tokens[i+1],O_WRONLY|O_APPEND|O_CREAT,0744);
 				if(newFile==-1) return 2;
@@ -211,6 +216,7 @@ int parse_cmd(char* tokens[], process_t* commands) {
 		nbProc++;	
   		i++;	
 	}
+	//commands[--nbProc].next=NULL;
   }
   return 0;
 }

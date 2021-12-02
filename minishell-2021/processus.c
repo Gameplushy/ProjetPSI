@@ -47,13 +47,16 @@ int init_process(process_t* proc) {
   process_t newProc;
   *proc=newProc;
   proc->pid=0;
-  proc->path=NULL;
+  proc->path="";
   proc->next=NULL;
   proc->argv=(char**)malloc(sizeof(char*)*20);
   proc->stdin=0;
   proc->stdout=1;
   proc->stderr=2;
   proc->bg=0;
+  proc->next=NULL;
+  proc->next_success=NULL;
+  proc->next_failure=NULL;
 }
 
 /*
@@ -68,7 +71,7 @@ int set_env(process_t* proc) {
   assert(proc!=NULL);
   int i=1;
   while(proc->argv[i]!=NULL){
-  	if(proc->argv[i][0]='$'){
+  	if(proc->argv[i][0]=='$'){
   		char* res = getenv(proc->argv[i]+1);
   		if(res==NULL) proc->argv[i]="";
   		else proc->argv[i]=res;
