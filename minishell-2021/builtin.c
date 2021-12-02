@@ -1,11 +1,11 @@
 /*
   Projet minishell - Licence 3 Info - PSI 2021
  
-  Nom :
-  Prénom :
-  Num. étudiant :
-  Groupe de projet :
-  Date :
+  Nom : FLORENT HERMAN
+  Prénom : Victor Loïck
+  Num. étudiant : 21900240 22112293
+  Groupe de projet : 15
+  Date : 2021-11-19
  
   Gestion des commandes internes du minishell (implémentation).
  
@@ -33,8 +33,9 @@
  */
 int is_builtin(const char* cmd) {
   assert(cmd!=NULL);
-  
-  
+    char* specialCmds[] = {"exit","cd","pwd","exit","export","unset",NULL};
+  for(int i=0;specialCmds[i]!=NULL;i++)
+  	if(strcmp(cmd,specialCmds[i])==0) return 1;
   return 0;
 }
 
@@ -51,7 +52,27 @@ int is_builtin(const char* cmd) {
 
 int builtin(process_t* proc) {
   assert(proc!=NULL);
-  
+	if(strcmp(proc->path,"cd")==0) {
+		if(proc->argv[1]==NULL||proc->argv[2]!=NULL) return -1;
+		return cd(proc->argv[1],proc->stderr);
+	}
+	//if(strcmp(proc->path,"exit")==0) return exit_shell(
+	if(strcmp(proc->path,"export")==0){
+		if(proc->argv[1]==NULL||proc->argv[2]!=NULL) return -1;
+		int c = 0;
+		while(proc->argv[1][c]!='\0' && proc->argv[1][c++]!='=');
+		if(proc->argv[1][--c]=='='){
+			proc->argv[1][c]='\0';
+			return export(proc->argv[1],proc->argv[1]+c+1,proc->stderr);
+		}
+		else return -1;
+	}
+	if(strcmp(proc->path,"exit")==0) return exit_shell(atoi(proc->argv[1]),proc->stdout);
+	if(strcmp(proc->path,"unset")==0) return unsetVar(proc->argv[1],proc->stderr);
+  /*switch(proc->path){
+  	default:
+   		return -1;
+  }*/
   return -1;
 }
 
@@ -67,8 +88,12 @@ int builtin(process_t* proc) {
  */
 
 int cd(const char* path, int fderr) {
-  assert(path!=NULL);
-  
+  //assert(path!=NULL);
+  if(path==NULL){
+  	fprintf(fderr,"Vous n'avez pas donné de répertoire!");
+  	return 1;
+  } 
+  return chdir(path);
 }
 
 /*
@@ -85,8 +110,16 @@ int cd(const char* path, int fderr) {
 int export(const char* var, const char* value, int fderr) {
   assert(var!=NULL);
   assert(value!=NULL);
-  
-  
+  int retvalue = setenv(var,value,1);  
+  if(retvalue) fprintf(fderr,"Export de la variable %s a retourné la valeur %d\n",var,retvalue);
+  return retvalue;
+}
+
+int unsetVar(const char* var, int fderr) {
+	assert(var!=NULL);
+	int retvalue = unsetenv(var);
+	if(retvalue) fprintf(fderr,"Destruction de la variable %s a retourné la valeur %d\n",var,retvalue);
+	return retvalue;
 }
 
 /*
@@ -100,5 +133,6 @@ int export(const char* var, const char* value, int fderr) {
  */
 
 int exit_shell(int ret, int fdout) {
-  
+	fprintf(fdout,"Fermeture avec code de retour %d\n",ret);  
+	return ret;
 }

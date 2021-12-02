@@ -1,11 +1,11 @@
 /*
   Projet minishell - Licence 3 Info - PSI 2021
  
-  Nom :
-  Prénom :
-  Num. étudiant :
-  Groupe de projet :
-  Date :
+  Nom : FLORENT HERMAN
+  Prénom : Victor Loïck
+  Num. étudiant : 21900240 22112293
+  Groupe de projet : 15
+  Date : 2021-11-19
  
   Gestion des processus (implémentation).
  
@@ -20,6 +20,8 @@
 
 #include "processus.h"
 #include "builtin.h"
+
+#include <stdio.h>
 
 #ifndef NDEBUG
 int check_zero(void* ptr, size_t size) {
@@ -42,7 +44,19 @@ int check_zero(void* ptr, size_t size) {
 int init_process(process_t* proc) {
   assert(proc!=NULL);
   assert(check_zero(proc, sizeof(*proc))==0);
-  
+  process_t newProc;
+  *proc=newProc;
+  proc->pid=0;
+  proc->path="";
+  proc->next=NULL;
+  proc->argv=(char**)malloc(sizeof(char*)*20);
+  proc->stdin=0;
+  proc->stdout=1;
+  proc->stderr=2;
+  proc->bg=0;
+  proc->next=NULL;
+  proc->next_success=NULL;
+  proc->next_failure=NULL;
 }
 
 /*
@@ -55,7 +69,15 @@ int init_process(process_t* proc) {
  */
 int set_env(process_t* proc) {
   assert(proc!=NULL);
-  
+  int i=1;
+  while(proc->argv[i]!=NULL){
+  	if(proc->argv[i][0]=='$'){
+  		char* res = getenv(proc->argv[i]+1);
+  		if(res==NULL) proc->argv[i]="";
+  		else proc->argv[i]=res;
+  	}
+  	i++;
+  }
 }
 
 /*
@@ -78,6 +100,27 @@ int set_env(process_t* proc) {
  */
 int launch_cmd(process_t* proc) {
   assert(proc!=NULL);
-  
+  proc->pid=fork();
+  if((proc->pid)!=0){ //Proc minishell
+  	if(!proc->bg) waitpid(proc->pid,&(proc->status),0);
+  	return WEXITSTATUS(proc->status);
+  }
+  else{ //Proc commande
+  	if(proc->stdin!=0){
+  		dup2(proc->stdin,0);
+  		close(proc->stdin);
+  	}
+  	if(proc->stdout!=1){
+  		dup2(proc->stdout,1);
+  		close(proc->stdout);
+  	}
+  	if(proc->stdout!=2){
+  		dup2(proc->stderr,2);
+  		close(proc->stderr);
+  	}
+  	if(is_builtin(proc->path)) return builtin(proc);
+  	else return execvp(proc->path,proc->argv);
+  	return -1;
+  }
   
 }

@@ -1,5 +1,5 @@
 CC ?= gcc
-CFLAGS ?= -Wall -Wextra
+CFLAGS ?= -Wall -Wextra -g
 LDFLAGS ?=
 
 objects := builtin.o main.o parser.o processus.o

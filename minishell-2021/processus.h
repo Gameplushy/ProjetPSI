@@ -1,11 +1,11 @@
-/*
+ /*
   Projet minishell - Licence 3 Info - PSI 2021
  
-  Nom :
-  Prénom :
-  Num. étudiant :
-  Groupe de projet :
-  Date :
+  Nom : FLORENT HERMAN
+  Prénom : Victor Loïck
+  Num. étudiant : 21900240 22112293
+  Groupe de projet : 15
+  Date : 2021-11-19
  
   Gestion des processus (headers).
  
