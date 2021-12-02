@@ -55,7 +55,6 @@ int main(int argc, char* argv[]) {
     	 case 0:{
     	 	process_t* currentProc=&cmds[0];
     	 	while(currentProc!=NULL){
-    	 		printf("%d\n",currentProc==NULL);
     	 		set_env(currentProc);
     	 		int returned = launch_cmd(currentProc);
     	 		if(currentProc->next!=NULL){ currentProc=currentProc->next;}

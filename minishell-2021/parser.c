@@ -109,7 +109,7 @@ int tokenize(char* str, char* tokens[]) {
  */
 int is_reserved(const char* tok) {
   assert(tok!=NULL);
-  char* specialKeys[] = {";","&","<",">","||","&&","|","<<","<<<",">&1",">&2","2>",NULL};
+  char* specialKeys[] = {";","&","<",">","||","&&","|",">>","2>>",">&1",">&2","2>",NULL};
   for(int i=0;specialKeys[i]!=NULL;i++)
   	if(strcmp(tok,specialKeys[i])==0) return 1;
   return 0;
@@ -171,7 +171,6 @@ int parse_cmd(char* tokens[], process_t* commands) {
 			if(tokens[i+1]!=NULL) commands[nbProc].next=&commands[nbProc+1];
 		}
 		else if((strcmp(tokens[i],"&&")==0 && negator==0) || (strcmp(tokens[i],"||")==0 && negator==1)){
-			printf("hey");
 		 	commands[nbProc].next_success=&commands[nbProc+1];
 		 	if(tokens[i+1]==NULL) return 3;
 		 }
