@@ -33,8 +33,8 @@
  */
 int is_builtin(const char* cmd) {
   assert(cmd!=NULL);
-    char* specialCmds[] = {"exit","cd","pwd","exit","export","unset",NULL};
-  for(int i=0;specialCmds[i]!=NULL;i++)
+    char* specialCmds[] = {"exit","cd","export","unset",NULL};
+  for(int i=0;specialCmds[i]!=NULL;i++) //Cycle the special command list until match or NULL reached
   	if(strcmp(cmd,specialCmds[i])==0) return 1;
   return 0;
 }
@@ -51,12 +51,11 @@ int is_builtin(const char* cmd) {
  */
 
 int builtin(process_t* proc) {
-  assert(proc!=NULL);
+  	assert(proc!=NULL);
 	if(strcmp(proc->path,"cd")==0) {
 		if(proc->argv[1]==NULL||proc->argv[2]!=NULL) return -1;
 		return cd(proc->argv[1],proc->stderr);
 	}
-	//if(strcmp(proc->path,"exit")==0) return exit_shell(
 	if(strcmp(proc->path,"export")==0){
 		if(proc->argv[1]==NULL||proc->argv[2]!=NULL) return -1;
 		int c = 0;
@@ -69,11 +68,7 @@ int builtin(process_t* proc) {
 	}
 	if(strcmp(proc->path,"exit")==0) return exit_shell(atoi(proc->argv[1]),proc->stdout);
 	if(strcmp(proc->path,"unset")==0) return unsetVar(proc->argv[1],proc->stderr);
-  /*switch(proc->path){
-  	default:
-   		return -1;
-  }*/
-  return -1;
+  	return -1;
 }
 
 /*

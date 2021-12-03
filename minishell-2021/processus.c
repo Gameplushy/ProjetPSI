@@ -57,6 +57,7 @@ int init_process(process_t* proc) {
   proc->next=NULL;
   proc->next_success=NULL;
   proc->next_failure=NULL;
+  proc->fdclose[0]=-1; proc->fdclose[1]=-1;
 }
 
 /*
@@ -118,6 +119,8 @@ int launch_cmd(process_t* proc) {
   		dup2(proc->stderr,2);
   		close(proc->stderr);
   	}
+  	if(proc->fdclose[0]!=-1) close(proc->fdclose[0]);
+  	if(proc->fdclose[1]!=-1) close(proc->fdclose[1]);
   	if(is_builtin(proc->path)) return builtin(proc);
   	else return execvp(proc->path,proc->argv);
   	return -1;

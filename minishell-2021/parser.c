@@ -109,7 +109,7 @@ int tokenize(char* str, char* tokens[]) {
  */
 int is_reserved(const char* tok) {
   assert(tok!=NULL);
-  char* specialKeys[] = {";","&","<",">","||","&&","|",">>","2>>",">&1",">&2","2>",NULL};
+  char* specialKeys[] = {";","&","<",">","||","&&","|",">>","2>>",">&2","2>&1","2>",NULL};
   for(int i=0;specialKeys[i]!=NULL;i++)
   	if(strcmp(tok,specialKeys[i])==0) return 1;
   return 0;
@@ -183,7 +183,9 @@ int parse_cmd(char* tokens[], process_t* commands) {
 	  		int tube[2];
 	  		pipe(tube);
 	  		commands[nbProc].stdout=tube[1];
+	  		commands[nbProc].fdclose[0]=tube[0];
 	  		commands[nbProc+1].stdin=tube[0];
+	  		commands[nbProc+1].fdclose[1]=tube[1];
 	  		commands[nbProc].next=&commands[nbProc+1];
 		}
 		else{ //redirecttions
@@ -210,6 +212,8 @@ int parse_cmd(char* tokens[], process_t* commands) {
 				/*if(strcmp(tokens[i],"<")==0)*/ commands[nbProc].stdin=newFile;
 				++i;
 			}
+			else if(strcmp(tokens[i],"2>&1")==0) commands[nbProc].stderr=commands[nbProc].stdout;
+			else if(strcmp(tokens[i],">&2")==0) commands[nbProc].stdout=commands[nbProc].stderr;
 			else commands[nbProc].next=&commands[nbProc+1]; //Sinon c'est ; ou rien du tout, donc aucun interférence avec le proc suivant.
 		}
 		nbProc++;	
