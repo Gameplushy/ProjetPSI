@@ -34,8 +34,9 @@
 int is_builtin(const char* cmd) {
   assert(cmd!=NULL);
     char* specialCmds[] = {"exit","cd","export","unset",NULL};
-  for(int i=0;specialCmds[i]!=NULL;i++) //Cycle the special command list until match or NULL reached
+  for(int i=0;specialCmds[i]!=NULL;i++){//Cycle the special command list until match or NULL reached
   	if(strcmp(cmd,specialCmds[i])==0) return 1;
+  }
   return 0;
 }
 
@@ -53,14 +54,14 @@ int is_builtin(const char* cmd) {
 int builtin(process_t* proc) {
   	assert(proc!=NULL);
 	if(strcmp(proc->path,"cd")==0) {
-		if(proc->argv[1]==NULL||proc->argv[2]!=NULL) return -1;
+		if(proc->argv[1]==NULL||proc->argv[2]!=NULL) return -1; //Make sure there's only one destination
 		return cd(proc->argv[1],proc->stderr);
 	}
 	if(strcmp(proc->path,"export")==0){
-		if(proc->argv[1]==NULL||proc->argv[2]!=NULL) return -1;
+		if(proc->argv[1]==NULL||proc->argv[2]!=NULL) return -1; //Make sure there's only one destination
 		int c = 0;
-		while(proc->argv[1][c]!='\0' && proc->argv[1][c++]!='=');
-		if(proc->argv[1][--c]=='='){
+		while(proc->argv[1][c]!='\0' && proc->argv[1][c++]!='='); //
+		if(proc->argv[1][--c]=='='){ //Check for a = in order to seperate variable from value
 			proc->argv[1][c]='\0';
 			return export(proc->argv[1],proc->argv[1]+c+1,proc->stderr);
 		}
@@ -85,10 +86,12 @@ int builtin(process_t* proc) {
 int cd(const char* path, int fderr) {
   //assert(path!=NULL);
   if(path==NULL){
-  	fprintf(fderr,"Vous n'avez pas donné de répertoire!");
+  	dprintf(fderr,"Vous n'avez pas donné de répertoire!");
   	return 1;
   } 
-  return chdir(path);
+  int retvalue = chdir(path);
+  if(retvalue==-1) dprintf(fderr,"Le répertoire de travail n'a pas changé vers %s.\n",path);
+  return retvalue;
 }
 
 /*
@@ -106,14 +109,21 @@ int export(const char* var, const char* value, int fderr) {
   assert(var!=NULL);
   assert(value!=NULL);
   int retvalue = setenv(var,value,1);  
-  if(retvalue) fprintf(fderr,"Export de la variable %s a retourné la valeur %d\n",var,retvalue);
+  if(retvalue==-1) dprintf(fderr,"Export de la variable %s a retourné la valeur %d\n",var,retvalue);
   return retvalue;
 }
+
+/*
+	Suppression d'une variable d'environnement
+	
+	var : nom de la variable
+	fderr
+*/
 
 int unsetVar(const char* var, int fderr) {
 	assert(var!=NULL);
 	int retvalue = unsetenv(var);
-	if(retvalue) fprintf(fderr,"Destruction de la variable %s a retourné la valeur %d\n",var,retvalue);
+	if(retvalue==-1) dprintf(fderr,"Destruction de la variable %s a retourné la valeur %d\n",var,retvalue);
 	return retvalue;
 }
 
@@ -128,6 +138,6 @@ int unsetVar(const char* var, int fderr) {
  */
 
 int exit_shell(int ret, int fdout) {
-	fprintf(fdout,"Fermeture avec code de retour %d\n",ret);  
+	dprintf(fdout,"Fermeture avec code de retour %d\n",ret);  
 	return ret;
 }

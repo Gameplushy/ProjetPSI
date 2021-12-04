@@ -49,7 +49,7 @@ int init_process(process_t* proc) {
   proc->pid=0;
   proc->path="";
   proc->next=NULL;
-  proc->argv=(char**)malloc(sizeof(char*)*20);
+  proc->argv=(char**)malloc(sizeof(char*)*20); //Arbitrary number
   proc->stdin=0;
   proc->stdout=1;
   proc->stderr=2;
@@ -58,6 +58,7 @@ int init_process(process_t* proc) {
   proc->next_success=NULL;
   proc->next_failure=NULL;
   proc->fdclose[0]=-1; proc->fdclose[1]=-1;
+  return 0;
 }
 
 /*
@@ -72,13 +73,11 @@ int set_env(process_t* proc) {
   assert(proc!=NULL);
   int i=1;
   while(proc->argv[i]!=NULL){
-  	if(proc->argv[i][0]=='$'){
-  		char* res = getenv(proc->argv[i]+1);
-  		if(res==NULL) proc->argv[i]="";
-  		else proc->argv[i]=res;
-  	}
+  	if(proc->argv[i][0]=='$') //Check if it's a variable (don't do anything if it's not)
+  		proc->argv[i]=getenv(proc->argv[i]+1);
   	i++;
   }
+  return 0;
 }
 
 /*

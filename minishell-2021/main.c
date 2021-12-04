@@ -19,14 +19,13 @@
 #include "parser.h"
 #include "processus.h"
 
-int main(int argc, char* argv[]) {
+int main() {
   char line[MAX_LINE_SIZE];
   char* cmdline[MAX_CMD_SIZE];
   process_t cmds[MAX_CMD_SIZE];
   
   while (1) {
     // (ré-)Initialiser les variables/structures
-    int i=0;
     CLEAR(cmdline,MAX_CMD_SIZE);
     CLEAR(cmds,MAX_CMD_SIZE);
     for(int i=0;i<MAX_CMD_SIZE;i++) init_process(&cmds[i]);
@@ -57,6 +56,7 @@ int main(int argc, char* argv[]) {
     	 	while(currentProc!=NULL){
     	 		set_env(currentProc);
     	 		int returned = launch_cmd(currentProc);
+    	 		if(strcmp(currentProc->path,"exit")==0) return returned;
     	 		if(currentProc->next!=NULL){ currentProc=currentProc->next;}
     	 		else{
     	 			if(returned==0 && currentProc->next_success!=NULL){ currentProc=currentProc->next_success;}
