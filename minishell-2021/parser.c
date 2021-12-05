@@ -196,7 +196,7 @@ int parse_cmd(char* tokens[], process_t* commands) {
 				else if(strcmp(tokens[i],"2>>")==0) commands[nbProc].stderr=newFile;
 				++i;
 			}
-			else if(strcmp(tokens[i],"<")==0){
+			else if(strcmp(tokens[i],"<")==0){ //Entrée
 				if(tokens[i+1]==NULL) return 1;
 				int newFile = open(tokens[i+1],O_RDONLY|O_CREAT,0744);
 				if(newFile==-1) return 2;
